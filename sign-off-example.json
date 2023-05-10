@@ -1,0 +1,12 @@
+{
+    "list": [
+        {
+            "name": "github-user",
+            "team": "team name"
+        },
+        {
+            "name": "github-user-2",
+            "team": "team name 2"
+        }
+    ]
+}
