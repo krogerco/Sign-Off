@@ -24,13 +24,11 @@ import {getInput} from '@actions/core'
 type Inputs = {
   label: string
   name: string
-  path: string
   token: string
 }
 
 export const input: Inputs = {
   label: getInput('label'),
   name: getInput('file-name'),
-  path: getInput('path'),
   token: getInput('github-token')
 }

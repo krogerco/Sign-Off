@@ -54,8 +54,7 @@ You can customize the setup of sign-off to your liking. This can be done by edit
 | github-token| YES         | The value needed is `${{ secrets.GITHUB_TOKEN }}` (as seen above).
 | branch-name | NO          | This is the branch that has the [user list](#user-list) you want to use. <br>The default value is `main`.
 | file-name   | NO          | This is the name of the json file you want to use. Do not add the file extension. <br>The default value is `sign-off`.
-| label       | NO          | This is the label that needs to be removed from the PR for the merge to take place. <br> The default value is `needs-qa`
-| path        | NO          | This is the relative path (no need to add './') to the json file that holds the user list. <br>The default value is the root of the project.
+| label       | NO          | This is the label that needs to be removed from the PR for the merge to take place. <br> The default value is `needs-qa`.
 
 Here is an example of the yaml file with all of the inputs filled in:  
 ```yaml
@@ -79,11 +78,10 @@ jobs:
           branch-name: 'main'
           file-name: 'sign-off'
           label: 'needs-qa'
-          path: 'path/to/JSON/file'
 ```
 
 ## <a id="user-list"></a>User List ##
-This is the list of users that need to give their approval for the PR to be merged. The name field should have the person's github username set as its value. This should go into either the root of the project or where specified in the workflow.
+This is the list of users that need to give their approval for the PR to be merged. The name field should have the person's github username set as its value. The default name for the file is `sign-off`, but you do have the ability to name it something else (see [input parameters](#input-parameters) for details). Make sure to place this file in `<project-root>/.github`.
 ```json
 {
     "list": [

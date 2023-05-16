@@ -19,13 +19,14 @@
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import {GITHUB} from './github'
 import {exec} from '@actions/exec'
 import {getInput} from '@actions/core'
 import {input} from '../utils/inputs'
 
 export class GitCommand {
   private readonly signOffAlias: string
-  private readonly path: string
+  private readonly githubDir: string
   private readonly file: string
   private readonly repo: string
 
@@ -34,14 +35,11 @@ export class GitCommand {
 
   constructor() {
     this.signOffAlias = 'sign-off-repo'
+    this.githubDir = `${GITHUB.directory}`
     this.branchName = getInput('branch-name')
     this.fileName = input.name
-    this.path = input.path
     this.repo = `${this.signOffAlias}/${this.branchName}`
-    this.file =
-      this.path === ''
-        ? `${this.fileName}.json`
-        : `./${this.path}/${this.fileName}.json`
+    this.file = `${this.githubDir}/${this.fileName}.json`
   }
 
   async init(): Promise<void> {
@@ -80,17 +78,8 @@ export class GitCommand {
     }
   }
 
-  async checkoutSignOffFile(): Promise<void> {
-    const result = GitCommand.executeGitCommand([
-      'checkout',
-      this.repo,
-      '--',
-      this.file
-    ])
-
-    if ((await result) !== 0) {
-      throw new Error('We could not checkout the remote repo')
-    }
+  async checkoutGithubDirectory(): Promise<void> {
+    GitCommand.executeGitCommand(['checkout', this.repo, '--', this.githubDir])
   }
 
   static async executeGitCommand(args: string[]): Promise<number> {

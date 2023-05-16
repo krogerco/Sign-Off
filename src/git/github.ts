@@ -21,6 +21,10 @@
 
 import * as github from '@actions/github'
 
+export const GITHUB = {
+  directory: '.github'
+}
+
 export async function checkEventTrigger(): Promise<Boolean> {
   const [eventTrigger, eventType] = await Promise.all([
     github.context.eventName,
