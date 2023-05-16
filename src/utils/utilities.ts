@@ -20,8 +20,11 @@
  */
 
 import * as github from '@actions/github'
+import {GITHUB} from '../git/github'
 import {GitCommand} from '../git/git-command'
+import {exec} from '@actions/exec'
 import {input} from './inputs'
+import {mv} from '@actions/io'
 
 const git = new GitCommand()
 
@@ -48,5 +51,11 @@ export async function getSignOffList(): Promise<void> {
     )
   }
 
-  await git.checkoutSignOffFile()
+  await git.checkoutGithubDirectory()
+}
+
+export async function moveSignOffFile(): Promise<void> {
+  await exec('ls', ['-a', `${GITHUB.directory}`])
+  await mv(`${GITHUB.directory}/${input.name}.json`, '.')
+  await exec('ls')
 }

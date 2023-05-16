@@ -22,6 +22,7 @@
 import * as github from '@actions/github'
 import {GithubAPI} from './git/github-api'
 import {input} from './utils/inputs'
+import {moveSignOffFile} from './utils/utilities'
 import {notice} from '@actions/core'
 import {readFileSync} from 'fs'
 
@@ -42,6 +43,8 @@ export async function hasBeenApproved(): Promise<void> {
 }
 
 async function isApprover(): Promise<boolean> {
+  await moveSignOffFile()
+
   const data = readFileSync(`${input.name}.json`, 'utf-8')
   const approvers = JSON.parse(data)
 
