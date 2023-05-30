@@ -38,15 +38,18 @@ export class GithubAPI {
     this.repo = github.context.repo.repo
   }
 
-  async removeLabelFromPullRequest(): Promise<void> {
-    const response = await this.octokit.rest.issues.removeLabel({
-      owner: this.owner,
-      repo: this.repo,
-      issue_number: this.issueNumber,
-      name: this.label
-    })
-
-    if (response.status !== 200) {
+  async removeLabelFromPullRequest(approver: string): Promise<void> {
+    try {
+      await this.octokit.rest.issues.removeLabel({
+        owner: this.owner,
+        repo: this.repo,
+        issue_number: this.issueNumber,
+        name: this.label
+      })
+    } catch {
+      if ((await this.labelWasRemoved()) && approver === github.context.actor) {
+        return
+      }
       throw new Error(`The ${this.label} was not removed`)
     }
   }

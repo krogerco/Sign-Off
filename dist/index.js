@@ -23996,14 +23996,15 @@ function isApprover() {
         yield (0, utilities_1.moveSignOffFile)();
         const data = (0, fs_1.readFileSync)(`${inputs_1.input.name}.json`, 'utf-8');
         const approvers = JSON.parse(data);
-        for (const approver of approvers.list) {
-            if (approver.name === github.context.actor) {
-                yield api.removeLabelFromPullRequest();
-                (0, core_1.notice)(`This was approved by ${approver.name} on team ${approver.team}`);
-                return true;
-            }
+        const list = approvers.list;
+        const checkApprover = (approve) => approve.name === github.context.actor;
+        const approver = list.filter(checkApprover);
+        const confirmed = list.some(checkApprover);
+        if (confirmed) {
+            yield api.removeLabelFromPullRequest(approver[0].name);
+            (0, core_1.notice)(`This was approved by ${approver[0].name} on team ${approver[0].team}`);
         }
-        return false;
+        return confirmed;
     });
 }
 
@@ -24141,15 +24142,20 @@ class GithubAPI {
         this.owner = github.context.repo.owner;
         this.repo = github.context.repo.repo;
     }
-    removeLabelFromPullRequest() {
+    removeLabelFromPullRequest(approver) {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.octokit.rest.issues.removeLabel({
-                owner: this.owner,
-                repo: this.repo,
-                issue_number: this.issueNumber,
-                name: this.label
-            });
-            if (response.status !== 200) {
+            try {
+                yield this.octokit.rest.issues.removeLabel({
+                    owner: this.owner,
+                    repo: this.repo,
+                    issue_number: this.issueNumber,
+                    name: this.label
+                });
+            }
+            catch (_a) {
+                if ((yield this.labelWasRemoved()) && approver === github.context.actor) {
+                    return;
+                }
                 throw new Error(`The ${this.label} was not removed`);
             }
         });
