@@ -45,16 +45,27 @@ export async function hasBeenApproved(): Promise<void> {
 async function isApprover(): Promise<boolean> {
   await moveSignOffFile()
 
-  const data = readFileSync(`${input.name}.json`, 'utf-8')
-  const approvers = JSON.parse(data)
-
-  for (const approver of approvers.list) {
-    if (approver.name === github.context.actor) {
-      await api.removeLabelFromPullRequest()
-      notice(`This was approved by ${approver.name} on team ${approver.team}`)
-      return true
-    }
+  type Approver = {
+    name: string
+    team: string
   }
 
-  return false
+  const data = readFileSync(`${input.name}.json`, 'utf-8')
+  const approvers = JSON.parse(data)
+  const list: [Approver] = approvers.list
+
+  const checkApprover = (approve: {name: string}): boolean =>
+    approve.name === github.context.actor
+
+  const approver = list.filter(checkApprover)
+  const confirmed = list.some(checkApprover)
+
+  if (confirmed) {
+    await api.removeLabelFromPullRequest(approver[0].name)
+    notice(
+      `This was approved by ${approver[0].name} on team ${approver[0].team}`
+    )
+  }
+
+  return confirmed
 }
