@@ -23996,15 +23996,13 @@ function isApprover() {
         yield (0, utilities_1.moveSignOffFile)();
         const data = (0, fs_1.readFileSync)(`${inputs_1.input.name}.json`, 'utf-8');
         const approvers = JSON.parse(data);
-        const list = approvers.list;
-        const checkApprover = (approve) => approve.name === github.context.actor;
-        const approver = list.filter(checkApprover);
-        const confirmed = list.some(checkApprover);
-        if (confirmed) {
-            yield api.removeLabelFromPullRequest(approver[0].name);
-            (0, core_1.notice)(`This was approved by ${approver[0].name} on team ${approver[0].team}`);
+        const approver = approvers.list.find((approvedBy) => approvedBy.name === github.context.actor);
+        if (approver !== undefined) {
+            yield api.removeLabelFromPullRequest(approver.name);
+            (0, core_1.notice)(`This was approved by ${approver.name} on team ${approver.team}`);
+            return true;
         }
-        return confirmed;
+        return false;
     });
 }
 
@@ -24162,17 +24160,19 @@ class GithubAPI {
     }
     labelWasRemoved() {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.octokit.rest.issues.listLabelsOnIssue({
-                owner: this.owner,
-                repo: this.repo,
-                issue_number: this.issueNumber
-            });
-            for (const pullRequestLabel of response.data) {
-                if (pullRequestLabel.name === this.label) {
-                    return false;
-                }
+            let hasLabel;
+            try {
+                const response = yield this.octokit.rest.issues.listLabelsOnIssue({
+                    owner: this.owner,
+                    repo: this.repo,
+                    issue_number: this.issueNumber
+                });
+                hasLabel = response.data.some(label => label.name === this.label);
             }
-            return true;
+            catch (_a) {
+                throw new Error();
+            }
+            return !hasLabel;
         });
     }
 }

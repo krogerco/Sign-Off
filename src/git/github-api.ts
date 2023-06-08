@@ -55,18 +55,20 @@ export class GithubAPI {
   }
 
   async labelWasRemoved(): Promise<boolean> {
-    const response = await this.octokit.rest.issues.listLabelsOnIssue({
-      owner: this.owner,
-      repo: this.repo,
-      issue_number: this.issueNumber
-    })
+    let hasLabel: boolean
 
-    for (const pullRequestLabel of response.data) {
-      if (pullRequestLabel.name === this.label) {
-        return false
-      }
+    try {
+      const response = await this.octokit.rest.issues.listLabelsOnIssue({
+        owner: this.owner,
+        repo: this.repo,
+        issue_number: this.issueNumber
+      })
+
+      hasLabel = response.data.some(label => label.name === this.label)
+    } catch {
+      throw new Error()
     }
 
-    return true
+    return !hasLabel
   }
 }
