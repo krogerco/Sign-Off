@@ -52,20 +52,17 @@ async function isApprover(): Promise<boolean> {
 
   const data = readFileSync(`${input.name}.json`, 'utf-8')
   const approvers = JSON.parse(data)
-  const list: [Approver] = approvers.list
 
-  const checkApprover = (approve: {name: string}): boolean =>
-    approve.name === github.context.actor
+  const approver: Approver = approvers.list.find(
+    (approvedBy: Approver) => approvedBy.name === github.context.actor
+  )
 
-  const approver = list.filter(checkApprover)
-  const confirmed = list.some(checkApprover)
+  if (approver !== undefined) {
+    await api.removeLabelFromPullRequest(approver.name)
+    notice(`This was approved by ${approver.name} on team ${approver.team}`)
 
-  if (confirmed) {
-    await api.removeLabelFromPullRequest(approver[0].name)
-    notice(
-      `This was approved by ${approver[0].name} on team ${approver[0].team}`
-    )
+    return true
   }
 
-  return confirmed
+  return false
 }
