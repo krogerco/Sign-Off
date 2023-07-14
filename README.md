@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: sign off
-        uses: krogerco/sign-off@v1.1.1
+        uses: krogerco/sign-off@v1.2.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: sign off
-        uses: krogerco/sign-off@v1.1.1
+        uses: krogerco/sign-off@v1.2.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch-name: 'main'
